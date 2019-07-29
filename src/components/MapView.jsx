@@ -1,32 +1,29 @@
-import React, { Component } from 'react';
+import React, { useContext, useEffect } from 'react';
 import ol from 'openlayers';
 import { SuperMapCloud } from '@supermap/iclient-openlayers';
+import { MapContext } from '../App';
 
-class MapView extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            map: new ol.Map()
-        };
-    }
+function MapView() {
 
-    componentDidMount() {
-        this.state.map.setProperties({
+    const map = useContext(MapContext);
+
+    useEffect(() => {
+        let layer = new ol.layer.Tile({
+            source: new SuperMapCloud()
+        });
+        map.setProperties({
             target: 'map',
             view: new ol.View({
                 center: [0, 0],
                 zoom: 2
             })
         });
-        let layer = new ol.layer.Tile({
-            source: new SuperMapCloud()
-        });
-        this.state.map.addLayer(layer);
-    }
+        map.addLayer(layer);
+    });
 
-    render() {
-        return <div id="map" />;
-    }
+    return (
+        <div id="map" />
+    );
 }
 
 export default MapView;
