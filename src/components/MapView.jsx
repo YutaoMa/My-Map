@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import ol from 'openlayers';
-import { SuperMapCloud } from '@supermap/iclient-openlayers';
+import { SuperMapCloud, SuperMap } from '@supermap/iclient-openlayers';
 
 function MapView(props) {
     let map = props.map;
@@ -9,7 +9,10 @@ function MapView(props) {
         const baseLayer = new ol.layer.Tile({
             source: new SuperMapCloud()
         });
-        const vectorLayer = new ol.layer.Vector({
+        const markerLayer = new ol.layer.Vector({
+            source: new ol.source.Vector()
+        });
+        const featureLayer = new ol.layer.Vector({
             source: new ol.source.Vector()
         });
         map.setProperties({
@@ -19,8 +22,10 @@ function MapView(props) {
                 zoom: 2
             })
         });
+        map.addControl(new ol.control.OverviewMap());
         map.getLayers().insertAt(0, baseLayer);
-        map.getLayers().insertAt(1, vectorLayer);
+        map.getLayers().insertAt(1, markerLayer);
+        map.getLayers().insertAt(2, featureLayer);
     });
 
     return (
