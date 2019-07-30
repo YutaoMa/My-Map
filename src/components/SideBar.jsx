@@ -1,7 +1,7 @@
 import React from 'react';
 import ol from 'openlayers';
-import { SuperMapCloud, BaiduMap, AddressMatchService, GeoCodingParameter } from '@supermap/iclient-openlayers';
-import { Collapse, Radio, Input, Select, Switch } from 'antd';
+import { SuperMapCloud, BaiduMap, AddressMatchService, GeoCodingParameter, MeasureParameters, MeasureService } from '@supermap/iclient-openlayers';
+import { Collapse, Radio, Input, Select, Switch, message } from 'antd';
 
 function SideBar(props) {
     let map = props.map;
@@ -110,16 +110,78 @@ function SideBar(props) {
         baseLayer.setVisible(!current);
     }
 
+    function changeMeasureLayer() {
+        let measureLayer = map.getLayers().getArray()[3];
+        let current = measureLayer.getVisible();
+        measureLayer.setVisible(!current);
+    }
+
+    let measureUrl = "http://support.supermap.com.cn:8090/iserver/services/map-world/rest/maps/World";
+    let measureFeature = null;
+
+    function changeMeasure(e) {
+        map.removeInteraction(draw);
+        let source = map.getLayers().getArray()[3].getSource();
+        
+        switch (e.target.value) {
+            case "None":
+                break;
+            case "LineString":
+                draw = new ol.interaction.Draw({
+                    source: source,
+                    type: "LineString"
+                });
+                draw.on('drawstart', (evt) => {
+                    measureFeature = evt.feature;
+                });
+                draw.on('drawend', () => {
+                    let distanceMeasureParam = new MeasureParameters(measureFeature.getGeometry(), {
+                        prjCoordSys: 'EPSG:3857'
+                    });
+                    new MeasureService(measureUrl).measureDistance(distanceMeasureParam, (res) => {
+                        if (res.result.succeed) {
+                            message.info(res.result.distance + "米");
+                        }
+                    });
+                });
+                map.addInteraction(draw);
+                break;
+            case "Polygon":
+                    draw = new ol.interaction.Draw({
+                        source: source,
+                        type: "Polygon"
+                    });
+                    draw.on('drawstart', (evt) => {
+                        measureFeature = evt.feature;
+                    });
+                    draw.on('drawend', () => {
+                        let distanceMeasureParam = new MeasureParameters(measureFeature.getGeometry(), {
+                            prjCoordSys: 'EPSG:3857'
+                        });
+                        new MeasureService(measureUrl).measureArea(distanceMeasureParam, (res) => {
+                            if (res.result.succeed) {
+                                message.info(res.result.area + "平方米");
+                            }                            
+                        });
+                    });
+                    map.addInteraction(draw);
+                break;
+            default:
+                break;
+        }
+    }
+
     return (
         <Collapse>
             <Collapse.Panel header="图层开关">
+                <Switch defaultChecked checkedChildren="测量" unCheckedChildren="测量" onChange={changeMeasureLayer} />
                 <Switch defaultChecked checkedChildren="搜索" unCheckedChildren="搜索" onChange={changeFeatureLayer} />
                 <Switch defaultChecked checkedChildren="标注" unCheckedChildren="标注" onChange={changeMarkerLayer} />
                 <Switch defaultChecked checkedChildren="底图" unCheckedChildren="底图" onChange={changeBaseLayer} />
             </Collapse.Panel>
             <Collapse.Panel header="切换底图">
                 <Radio.Group buttonStyle="solid" defaultValue="SuperMapCloud" onChange={changeBaseMap}>
-                    <Radio.Button value="SuperMapCloud">高德地图</Radio.Button>
+                    <Radio.Button value="SuperMapCloud">超图云</Radio.Button>
                     <Radio.Button value="BaiduMap">百度地图</Radio.Button>
                     <Radio.Button value="OSM">OpenStreetMap</Radio.Button>
                 </Radio.Group>
@@ -139,6 +201,13 @@ function SideBar(props) {
                     <Select.Option value="北京市">北京市</Select.Option>
                 </Select>
                 <Input.Search placeholder="中文地址" onSearch={searchAddress} />
+            </Collapse.Panel>
+            <Collapse.Panel header="测量">
+                <Radio.Group buttonStyle="solid" defaultValue="None" onChange={changeMeasure}>
+                    <Radio.Button value="None">无测量</Radio.Button>
+                    <Radio.Button value="LineString">距离</Radio.Button>
+                    <Radio.Button value="Polygon">面积</Radio.Button>
+                </Radio.Group>
             </Collapse.Panel>
         </Collapse>
     );
