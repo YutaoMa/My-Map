@@ -1,7 +1,7 @@
 import React from 'react';
 import ol from 'openlayers';
 import { SuperMapCloud, BaiduMap, AddressMatchService, GeoCodingParameter } from '@supermap/iclient-openlayers';
-import { Collapse, Radio, Input, Select } from 'antd';
+import { Collapse, Radio, Input, Select, Switch } from 'antd';
 
 function SideBar(props) {
     let map = props.map;
@@ -92,8 +92,31 @@ function SideBar(props) {
         searchArea = value;
     }
 
+    function changeFeatureLayer() {
+        let featureLayer = map.getLayers().getArray()[2];
+        let current = featureLayer.getVisible();
+        featureLayer.setVisible(!current);
+    }
+
+    function changeMarkerLayer() {
+        let markerLayer = map.getLayers().getArray()[1];
+        let current = markerLayer.getVisible();
+        markerLayer.setVisible(!current);
+    }
+
+    function changeBaseLayer() {
+        let baseLayer = map.getLayers().getArray()[0];
+        let current = baseLayer.getVisible();
+        baseLayer.setVisible(!current);
+    }
+
     return (
         <Collapse>
+            <Collapse.Panel header="图层开关">
+                <Switch defaultChecked checkedChildren="搜索" unCheckedChildren="搜索" onChange={changeFeatureLayer} />
+                <Switch defaultChecked checkedChildren="标注" unCheckedChildren="标注" onChange={changeMarkerLayer} />
+                <Switch defaultChecked checkedChildren="底图" unCheckedChildren="底图" onChange={changeBaseLayer} />
+            </Collapse.Panel>
             <Collapse.Panel header="切换底图">
                 <Radio.Group buttonStyle="solid" defaultValue="SuperMapCloud" onChange={changeBaseMap}>
                     <Radio.Button value="SuperMapCloud">高德地图</Radio.Button>

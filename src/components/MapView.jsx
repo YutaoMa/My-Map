@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import ol from 'openlayers';
-import { SuperMapCloud, SuperMap } from '@supermap/iclient-openlayers';
+import { SuperMapCloud } from '@supermap/iclient-openlayers';
 
 function MapView(props) {
     let map = props.map;
@@ -22,6 +22,7 @@ function MapView(props) {
                 zoom: 2
             })
         });
+        map.addControl(new ol.control.ZoomSlider());
         map.addControl(new ol.control.OverviewMap());
         map.getLayers().insertAt(0, baseLayer);
         map.getLayers().insertAt(1, markerLayer);
