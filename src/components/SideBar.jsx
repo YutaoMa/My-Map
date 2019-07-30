@@ -1,11 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import ol from 'openlayers';
 import { SuperMapCloud, BaiduMap } from '@supermap/iclient-openlayers';
-import { MapContext } from '../context/MapContext';
 import { Collapse, Radio } from 'antd';
 
-function SideBar() {
-    let map = useContext(MapContext);
+function SideBar(props) {
+    let map = props.map;
 
     function changeBaseMap(e) {
         map.getLayers().removeAt(0);
@@ -30,6 +29,24 @@ function SideBar() {
         }
     }
 
+    let draw = null;
+
+    function changeDraw(e) {
+        map.removeInteraction(draw);
+        let source = map.getLayers().getArray()[1].getSource();
+        switch(e.target.value) {
+            case "NONE":
+                break;
+            default:
+                draw = new ol.interaction.Draw({
+                    source: source,
+                    type: e.target.value
+                });
+                map.addInteraction(draw);
+                break;
+        }
+    }
+
     return (
         <Collapse>
             <Collapse.Panel header="切换底图">
@@ -40,6 +57,13 @@ function SideBar() {
                 </Radio.Group>
             </Collapse.Panel>
             <Collapse.Panel header="标注">
+                <Radio.Group buttonStyle="solid" defaultValue="NONE" onChange={changeDraw}>
+                    <Radio.Button value="None">无绘制</Radio.Button>
+                    <Radio.Button value="Point">点</Radio.Button>
+                    <Radio.Button value="LineString">线</Radio.Button>
+                    <Radio.Button value="Polygon">多边形</Radio.Button>
+                    <Radio.Button value="Circle">圆</Radio.Button>
+                </Radio.Group>
             </Collapse.Panel>
         </Collapse>
     );
