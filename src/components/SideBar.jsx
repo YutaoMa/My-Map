@@ -39,6 +39,7 @@ function SideBar(props) {
                 break;
             case "Clear":
                 source.clear();
+                message.info('标注层已清除');
                 break;
             default:
                 draw = new ol.interaction.Draw({
@@ -58,6 +59,7 @@ function SideBar(props) {
         let geoCodeParam = new GeoCodingParameter({
             address: value,
             filters: searchArea,
+            prjCoordSys: "{epsgcode:3857}",
             maxReturn: 1
         });
         addressMatchService.code(geoCodeParam, (res) => {
@@ -84,6 +86,8 @@ function SideBar(props) {
                 source.addFeature(feature);
                 map.getView().setCenter(coordinate);
                 map.getView().setZoom(12);
+            } else {
+                message.error('没有找到该地址！');
             }
         });
     }
@@ -122,7 +126,8 @@ function SideBar(props) {
     function changeMeasure(e) {
         map.removeInteraction(draw);
         let source = map.getLayers().getArray()[3].getSource();
-        
+        source.clear();
+
         switch (e.target.value) {
             case "None":
                 break;

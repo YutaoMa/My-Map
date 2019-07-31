@@ -12,9 +12,9 @@ function App() {
   const map = new ol.Map();
 
   return (
-    <div className="App">
-      <Layout hasSider>
-          <Layout.Sider collapsible>
+    <div className="App" style={{ height: '100vh' }}>
+      <Layout hasSider style={{ height: '100%' }}>
+          <Layout.Sider>
             <SideBar map={map} />
           </Layout.Sider>
           <Layout.Content>
